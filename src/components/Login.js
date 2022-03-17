@@ -1,20 +1,21 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Form, Button } from "react-bootstrap";
 import axios from "axios";
 import qs from "qs";
 import jwt from "jwt-decode";
 
-function Login({ jwtToken, setJwtToken }) {
+function Login() {
+  const [getToken, setToken] = useState(null);
   const navigate = useNavigate();
   const emailRef = useRef("");
   const passwordRef = useRef("");
 
   useEffect(() => {
-    if (jwtToken !== null) {
+    if (getToken !== null) {
       navigate("/");
     }
-  }, [jwtToken, navigate]);
+  }, [getToken, navigate]);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -29,10 +30,14 @@ function Login({ jwtToken, setJwtToken }) {
           "Content-Type": "application/x-www-form-urlencoded",
         },
       })
-      .then((res) =>
-        setJwtToken({ userInfo: jwt(res.data.token), token: res.data.token })
-      );
+      .then((res) => {
+        const userData = jwt(res.data.token);
+        localStorage.setItem("userName", userData.userName);
+        localStorage.setItem("token", res.data.token);
+        setToken(res.data.token);
+      });
   }
+
   return (
     <Form onSubmit={handleSubmit} className="w-25 m-auto p-4 shadow mt-5">
       <h3 className="text-center">Login</h3>

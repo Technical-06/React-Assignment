@@ -4,32 +4,35 @@ import { useNavigate, Link } from "react-router-dom";
 import { Button, Navbar, Container } from "react-bootstrap";
 import ViewArticle from "./ViewArticle";
 
-function Home({ jwtToken, setJwtToken }) {
-  const navigate = useNavigate();
+function Home() {
   const [articles, setArticles] = useState(null);
+  const [removeToken, setRemoveToken] = useState(localStorage.getItem("token"));
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (jwtToken == null) {
+    if (removeToken == null) {
       navigate("/login");
     } else {
       axios
         .get("/users/viewarticles", {
           headers: {
-            Authorization: `Bearer ${jwtToken.token}`,
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         })
         .then((res) => setArticles(res.data));
     }
-  }, [jwtToken, navigate]);
+  }, [removeToken, navigate]);
 
   function handleLogout(e) {
     e.preventDefault();
-    setJwtToken(null);
+    localStorage.removeItem("userName");
+    localStorage.removeItem("token");
+    setRemoveToken(null);
   }
 
   return (
     <>
-      {jwtToken !== null && articles !== null ? (
+      {localStorage.getItem("token") !== null && articles !== null ? (
         <>
           <Navbar bg="dark" variant="dark" className="mb-5">
             <Container>
@@ -38,7 +41,7 @@ function Home({ jwtToken, setJwtToken }) {
               </div>
               <div>
                 <Navbar.Text className="text-white">
-                  Welcome {jwtToken.userInfo.userName}
+                  Welcome {localStorage.getItem("userName")}
                 </Navbar.Text>
                 <Button
                   onClick={handleLogout}

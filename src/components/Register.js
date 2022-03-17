@@ -1,21 +1,22 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import qs from "qs";
 import jwt from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import { Form, Button } from "react-bootstrap";
 
-function Register({ jwtToken, setJwtToken }) {
+function Register() {
+  const [getToken, setToken] = useState(null);
   const emailRef = useRef("");
   const passwordRef = useRef("");
   const userNameRef = useRef("");
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (jwtToken !== null) {
+    if (getToken !== null) {
       navigate("/");
     }
-  }, [jwtToken, navigate]);
+  }, [getToken, navigate]);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -31,9 +32,12 @@ function Register({ jwtToken, setJwtToken }) {
           "Content-Type": "application/x-www-form-urlencoded",
         },
       })
-      .then((res) =>
-        setJwtToken({ userInfo: jwt(res.data.token), token: res.data.token })
-      );
+      .then((res) => {
+        const userData = jwt(res.data.token);
+        localStorage.setItem("userName", userData.userName);
+        localStorage.setItem("token", res.data.token);
+        setToken(res.data.token);
+      });
   }
 
   return (
